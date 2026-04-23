@@ -13,8 +13,8 @@ public class HomePage {
     private WebDriver driver;
 
     private final By acceptCookieButton = By.id("rcc-confirm-button");
-    private final By orderHeaderButton = By.className("Button_Button__ra12g");
-    private final By orderFooterButton = By.xpath(".//button[@class='Button_Button__ra12g' and text()='Заказать']");
+    private final By orderHeaderButton = By.xpath("//div[contains(@class, 'Header')]//button[text()='Заказать']");
+    private final By orderFooterButton = By.xpath("//div[contains(@class, 'Home_FinishButton')]//button[text()='Заказать']");
 
     private final By question1 = By.id("accordion__heading-0");
     private final By question2 = By.id("accordion__heading-1");
@@ -49,9 +49,13 @@ public class HomePage {
     public void clickQuestion(int index) {
         By questionLocator = getQuestionLocator(index);
         WebElement element = driver.findElement(questionLocator);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        scrollToElement(element);
         new WebDriverWait(driver, Duration.ofSeconds(3))
                 .until(ExpectedConditions.elementToBeClickable(questionLocator)).click();
+
+        // Ожидание появления ответа
+        new WebDriverWait(driver, Duration.ofSeconds(3))
+                .until(ExpectedConditions.visibilityOfElementLocated(getAnswerLocator(index)));
     }
 
     public String getAnswerText(int index) {
@@ -88,13 +92,17 @@ public class HomePage {
         }
     }
 
-    public void clickOrderButton(boolean useTopButton) {
-        if (useTopButton) {
-            driver.findElement(orderHeaderButton).click();
-        } else {
-            WebElement element = driver.findElement(orderFooterButton);
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-            element.click();
-        }
+    public void clickOrderButtonTop() {
+        driver.findElement(orderHeaderButton).click();
+    }
+
+    public void clickOrderButtonBottom() {
+        WebElement element = driver.findElement(orderFooterButton);
+        scrollToElement(element);
+        element.click();
+    }
+
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 }

@@ -19,6 +19,8 @@ public class HomePageQuestionsTest {
     private final int questionIndex;
     private final String expectedAnswer;
 
+    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
+
     public HomePageQuestionsTest(int questionIndex, String expectedAnswer) {
         this.questionIndex = questionIndex;
         this.expectedAnswer = expectedAnswer;
@@ -42,7 +44,7 @@ public class HomePageQuestionsTest {
     public void setUp() {
         driver = new ChromeDriver();
         homePage = new HomePage(driver);
-        homePage.open("https://qa-scooter.praktikum-services.ru/");
+        homePage.open(BASE_URL);
         homePage.acceptCookie();
     }
 

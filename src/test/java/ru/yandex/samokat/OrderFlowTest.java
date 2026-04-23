@@ -18,6 +18,8 @@ public class OrderFlowTest {
     private HomePage homePage;
     private OrderPage orderPage;
 
+    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
+
     private final boolean useTopButton;
     private final String name;
     private final String surname;
@@ -25,11 +27,13 @@ public class OrderFlowTest {
     private final String metro;
     private final String phone;
     private final String date;
-    private final String color;
+    private final String period;
+    private final String[] colors;
     private final String comment;
 
     public OrderFlowTest(boolean useTopButton, String name, String surname, String address,
-                         String metro, String phone, String date, String color, String comment) {
+                         String metro, String phone, String date, String period,
+                         String[] colors, String comment) {
         this.useTopButton = useTopButton;
         this.name = name;
         this.surname = surname;
@@ -37,15 +41,18 @@ public class OrderFlowTest {
         this.metro = metro;
         this.phone = phone;
         this.date = date;
-        this.color = color;
+        this.period = period;
+        this.colors = colors;
         this.comment = comment;
     }
 
     @Parameterized.Parameters
     public static Object[][] getData() {
         return new Object[][]{
-                {true, "Иван", "Петров", "ул. Ленина, 1", "Сокольники", "89991234567", "08.05.2025", "black", "Позвоните за 10 минут"},
-                {false, "Анна", "Сидорова", "пр. Мира, 10", "Комсомольская", "89261112233", "09.05.2025", "grey", "Домофон 123"}
+                {true, "Иван", "Петров", "ул. Ленина, 1", "Сокольники", "89991234567",
+                        "08.05.2025", "сутки", new String[]{"black"}, "Позвоните за 10 минут"},
+                {false, "Анна", "Сидорова", "пр. Мира, 10", "Комсомольская", "89261112233",
+                        "09.05.2025", "двое суток", new String[]{"grey"}, "Домофон 123"}
         };
     }
 
@@ -54,16 +61,21 @@ public class OrderFlowTest {
         driver = new ChromeDriver();
         homePage = new HomePage(driver);
         orderPage = new OrderPage(driver);
-        homePage.open("https://qa-scooter.praktikum-services.ru/");
+        homePage.open(BASE_URL);
         homePage.acceptCookie();
     }
 
     @Test
     public void positiveOrderFlow() {
-        homePage.clickOrderButton(useTopButton);
+        if (useTopButton) {
+            homePage.clickOrderButtonTop();
+        } else {
+            homePage.clickOrderButtonBottom();
+        }
+
         orderPage.fillFirstForm(name, surname, address, metro, phone);
-        orderPage.fillSecondForm(date, color, comment);
-        assertTrue("Заказ не оформился!", orderPage.isOrderSuccess());
+        orderPage.fillSecondForm(date, period, colors, comment);
+        assertTrue(orderPage.isOrderSuccess());
     }
 
     @After
