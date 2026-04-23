@@ -1,8 +1,0 @@
-.idea/
-.mvn/
-target/
-*.iml
-.DS_Store
-*.log
-/shelf/
-/workspace.xml
