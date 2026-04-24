@@ -13,22 +13,21 @@ import java.time.Duration;
 public class OrderPage {
     private WebDriver driver;
 
-    private final By nameField = By.xpath(".//input[@placeholder='* Имя']");
-    private final By surnameField = By.xpath(".//input[@placeholder='* Фамилия']");
-    private final By addressField = By.xpath(".//input[@placeholder='* Адрес: куда привезти заказ']");
-    private final By metroField = By.xpath(".//input[@placeholder='* Станция метро']");
-    private final By phoneField = By.xpath(".//input[@placeholder='* Телефон: на него позвонит курьер']");
-    private final By nextButton = By.xpath(".//button[text()='Далее']");
+    private final By nameField = By.xpath("//input[@placeholder='* Имя']");
+    private final By surnameField = By.xpath("//input[@placeholder='* Фамилия']");
+    private final By addressField = By.xpath("//input[@placeholder='* Адрес: куда привезти заказ']");
+    private final By metroField = By.xpath("//input[@placeholder='* Станция метро']");
+    private final By phoneField = By.xpath("//input[@placeholder='* Телефон: на него позвонит курьер']");
+    private final By nextButton = By.xpath("//button[text()='Далее']");
 
-    private final By dateField = By.xpath(".//input[@placeholder='* Когда привезти самокат']");
+    private final By dateField = By.xpath("//input[@placeholder='* Когда привезти самокат']");
     private final By rentalPeriodDropdown = By.className("Dropdown-control");
-    private final By rentalPeriodOption = By.xpath(".//div[@class='Dropdown-option' and text()='сутки']");
     private final By colorCheckboxBlack = By.id("black");
     private final By colorCheckboxGrey = By.id("grey");
-    private final By commentField = By.xpath(".//input[@placeholder='Комментарий для курьера']");
-    private final By orderButton = By.xpath(".//button[text()='Заказать']");
-    private final By confirmOrderButton = By.xpath(".//button[text()='Да']");
-    private final By successMessage = By.xpath(".//div[contains(text(), 'Заказ оформлен')]");
+    private final By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
+    private final By orderButton = By.xpath("//div[contains(@class, 'Order_Buttons')]//button[text()='Заказать']");
+    private final By confirmOrderButton = By.xpath("//button[text()='Да']");
+    private final By successMessage = By.xpath("//div[contains(text(), 'Заказ оформлен')]");
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;
@@ -46,55 +45,64 @@ public class OrderPage {
         driver.findElement(nextButton).click();
     }
 
-    public void fillSecondForm(String date, String color, String comment) {
+    public void fillSecondForm(String date, String period, String[] colors, String comment) {
+        fillDate(date);
+        selectRentalPeriod(period);
+        selectColors(colors);
+        fillComment(comment);
+        confirmOrder();
+    }
+
+    private void fillDate(String date) {
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(dateField));
-        driver.findElement(dateField).sendKeys(date);
-        driver.findElement(dateField).sendKeys(Keys.ENTER);
+        WebElement dateInput = driver.findElement(dateField);
+        dateInput.sendKeys(date);
+        dateInput.sendKeys(Keys.ENTER);
+    }
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    private void selectRentalPeriod(String period) {
         WebElement dropdown = driver.findElement(rentalPeriodDropdown);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dropdown);
-
+        scrollToElement(dropdown);
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.elementToBeClickable(rentalPeriodDropdown)).click();
-        driver.findElement(rentalPeriodOption).click();
+        String periodLocator = String.format("//div[@class='Dropdown-option' and text()='%s']", period);
+        new WebDriverWait(driver, Duration.ofSeconds(3))
+                .until(ExpectedConditions.elementToBeClickable(By.xpath(periodLocator))).click();
+    }
 
-        if (color.equals("black")) {
-            driver.findElement(colorCheckboxBlack).click();
-        } else {
-            driver.findElement(colorCheckboxGrey).click();
+    private void selectColors(String[] colors) {
+        for (String color : colors) {
+            if (color.equalsIgnoreCase("black")) {
+                driver.findElement(colorCheckboxBlack).click();
+            } else if (color.equalsIgnoreCase("grey")) {
+                driver.findElement(colorCheckboxGrey).click();
+            }
         }
+    }
 
+    private void fillComment(String comment) {
         driver.findElement(commentField).sendKeys(comment);
+    }
 
+    private void confirmOrder() {
         WebElement orderBtn = driver.findElement(orderButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", orderBtn);
-
+        scrollToElement(orderBtn);
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.elementToBeClickable(orderButton)).click();
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        WebElement confirmBtn = driver.findElement(confirmOrderButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", confirmBtn);
-
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(confirmOrderButton)).click();
+        WebElement confirmBtn = new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(confirmOrderButton));
+        scrollToElement(confirmBtn);
+        confirmBtn.click();
     }
 
     public boolean isOrderSuccess() {
         return new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(successMessage))
                 .isDisplayed();
+    }
+
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 }

@@ -13,26 +13,26 @@ public class HomePage {
     private WebDriver driver;
 
     private final By acceptCookieButton = By.id("rcc-confirm-button");
-    private final By orderHeaderButton = By.className("Button_Button__ra12g");
-    private final By orderFooterButton = By.xpath(".//button[@class='Button_Button__ra12g' and text()='Заказать']");
+    private final By orderHeaderButton = By.xpath("//div[contains(@class, 'Header')]//button[text()='Заказать']");
+    private final By orderFooterButton = By.xpath("//div[contains(@class, 'Home_FinishButton')]//button[text()='Заказать']");
 
-    private final By question1 = By.id("accordion__heading-0");
-    private final By question2 = By.id("accordion__heading-1");
-    private final By question3 = By.id("accordion__heading-2");
-    private final By question4 = By.id("accordion__heading-3");
-    private final By question5 = By.id("accordion__heading-4");
-    private final By question6 = By.id("accordion__heading-5");
-    private final By question7 = By.id("accordion__heading-6");
-    private final By question8 = By.id("accordion__heading-7");
+    private final By questionHowMuch = By.id("accordion__heading-0");
+    private final By questionSeveralScooters = By.id("accordion__heading-1");
+    private final By questionRentTime = By.id("accordion__heading-2");
+    private final By questionTodayDelivery = By.id("accordion__heading-3");
+    private final By questionExtendOrReturn = By.id("accordion__heading-4");
+    private final By questionCharging = By.id("accordion__heading-5");
+    private final By questionCancelOrder = By.id("accordion__heading-6");
+    private final By questionDeliveryArea = By.id("accordion__heading-7");
 
-    private final By answer1 = By.xpath("//div[@id='accordion__panel-0']/p");
-    private final By answer2 = By.xpath("//div[@id='accordion__panel-1']/p");
-    private final By answer3 = By.xpath("//div[@id='accordion__panel-2']/p");
-    private final By answer4 = By.xpath("//div[@id='accordion__panel-3']/p");
-    private final By answer5 = By.xpath("//div[@id='accordion__panel-4']/p");
-    private final By answer6 = By.xpath("//div[@id='accordion__panel-5']/p");
-    private final By answer7 = By.xpath("//div[@id='accordion__panel-6']/p");
-    private final By answer8 = By.xpath("//div[@id='accordion__panel-7']/p");
+    private final By answerHowMuch = By.xpath("//div[@id='accordion__panel-0']/p");
+    private final By answerSeveralScooters = By.xpath("//div[@id='accordion__panel-1']/p");
+    private final By answerRentTime = By.xpath("//div[@id='accordion__panel-2']/p");
+    private final By answerTodayDelivery = By.xpath("//div[@id='accordion__panel-3']/p");
+    private final By answerExtendOrReturn = By.xpath("//div[@id='accordion__panel-4']/p");
+    private final By answerCharging = By.xpath("//div[@id='accordion__panel-5']/p");
+    private final By answerCancelOrder = By.xpath("//div[@id='accordion__panel-6']/p");
+    private final By answerDeliveryArea = By.xpath("//div[@id='accordion__panel-7']/p");
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
@@ -49,9 +49,12 @@ public class HomePage {
     public void clickQuestion(int index) {
         By questionLocator = getQuestionLocator(index);
         WebElement element = driver.findElement(questionLocator);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        scrollToElement(element);
         new WebDriverWait(driver, Duration.ofSeconds(3))
                 .until(ExpectedConditions.elementToBeClickable(questionLocator)).click();
+
+        new WebDriverWait(driver, Duration.ofSeconds(3))
+                .until(ExpectedConditions.visibilityOfElementLocated(getAnswerLocator(index)));
     }
 
     public String getAnswerText(int index) {
@@ -62,39 +65,47 @@ public class HomePage {
 
     private By getQuestionLocator(int index) {
         switch (index) {
-            case 1: return question1;
-            case 2: return question2;
-            case 3: return question3;
-            case 4: return question4;
-            case 5: return question5;
-            case 6: return question6;
-            case 7: return question7;
-            case 8: return question8;
-            default: return question1;
+            case 1: return questionHowMuch;
+            case 2: return questionSeveralScooters;
+            case 3: return questionRentTime;
+            case 4: return questionTodayDelivery;
+            case 5: return questionExtendOrReturn;
+            case 6: return questionCharging;
+            case 7: return questionCancelOrder;
+            case 8: return questionDeliveryArea;
+            default: return questionHowMuch;
         }
     }
 
     private By getAnswerLocator(int index) {
         switch (index) {
-            case 1: return answer1;
-            case 2: return answer2;
-            case 3: return answer3;
-            case 4: return answer4;
-            case 5: return answer5;
-            case 6: return answer6;
-            case 7: return answer7;
-            case 8: return answer8;
-            default: return answer1;
+            case 1: return answerHowMuch;
+            case 2: return answerSeveralScooters;
+            case 3: return answerRentTime;
+            case 4: return answerTodayDelivery;
+            case 5: return answerExtendOrReturn;
+            case 6: return answerCharging;
+            case 7: return answerCancelOrder;
+            case 8: return answerDeliveryArea;
+            default: return answerHowMuch;
         }
     }
 
-    public void clickOrderButton(boolean useTopButton) {
-        if (useTopButton) {
-            driver.findElement(orderHeaderButton).click();
-        } else {
-            WebElement element = driver.findElement(orderFooterButton);
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-            element.click();
-        }
+    public void clickOrderButtonTop() {
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(orderHeaderButton))
+                .click();
+    }
+
+    public void clickOrderButtonBottom() {
+        WebElement element = driver.findElement(orderFooterButton);
+        scrollToElement(element);
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(orderFooterButton))
+                .click();
+    }
+
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 }
