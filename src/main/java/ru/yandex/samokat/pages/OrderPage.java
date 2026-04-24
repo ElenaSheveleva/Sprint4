@@ -46,38 +46,29 @@ public class OrderPage {
     }
 
     public void fillSecondForm(String date, String period, String[] colors, String comment) {
+        fillDate(date);
+        selectRentalPeriod(period);
+        selectColors(colors);
+        fillComment(comment);
+        confirmOrder();
+    }
+
+    private void fillDate(String date) {
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(dateField));
-
         WebElement dateInput = driver.findElement(dateField);
         dateInput.sendKeys(date);
         dateInput.sendKeys(Keys.ENTER);
+    }
 
+    private void selectRentalPeriod(String period) {
         WebElement dropdown = driver.findElement(rentalPeriodDropdown);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", dropdown);
-
+        scrollToElement(dropdown);
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.elementToBeClickable(rentalPeriodDropdown)).click();
-
         String periodLocator = String.format("//div[@class='Dropdown-option' and text()='%s']", period);
         new WebDriverWait(driver, Duration.ofSeconds(3))
                 .until(ExpectedConditions.elementToBeClickable(By.xpath(periodLocator))).click();
-
-        selectColors(colors);
-
-        driver.findElement(commentField).sendKeys(comment);
-
-        WebElement orderBtn = driver.findElement(orderButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", orderBtn);
-
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.elementToBeClickable(orderButton))
-                .click();
-
-        WebElement confirmBtn = new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.elementToBeClickable(confirmOrderButton));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", confirmBtn);
-        confirmBtn.click();
     }
 
     private void selectColors(String[] colors) {
@@ -90,9 +81,28 @@ public class OrderPage {
         }
     }
 
+    private void fillComment(String comment) {
+        driver.findElement(commentField).sendKeys(comment);
+    }
+
+    private void confirmOrder() {
+        WebElement orderBtn = driver.findElement(orderButton);
+        scrollToElement(orderBtn);
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(orderButton)).click();
+        WebElement confirmBtn = new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(confirmOrderButton));
+        scrollToElement(confirmBtn);
+        confirmBtn.click();
+    }
+
     public boolean isOrderSuccess() {
         return new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(successMessage))
                 .isDisplayed();
+    }
+
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 }

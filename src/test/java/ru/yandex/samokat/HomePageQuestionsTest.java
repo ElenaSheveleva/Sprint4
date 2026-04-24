@@ -1,25 +1,19 @@
 package ru.yandex.samokat;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import ru.yandex.samokat.pages.HomePage;
 
 import static org.junit.Assert.assertEquals;
+import static ru.yandex.samokat.TestData.BASE_URL;
 
 @RunWith(Parameterized.class)
-public class HomePageQuestionsTest {
-    private WebDriver driver;
+public class HomePageQuestionsTest extends BaseTest {
     private HomePage homePage;
 
     private final int questionIndex;
     private final String expectedAnswer;
-
-    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
 
     public HomePageQuestionsTest(int questionIndex, String expectedAnswer) {
         this.questionIndex = questionIndex;
@@ -40,25 +34,13 @@ public class HomePageQuestionsTest {
         };
     }
 
-    @Before
-    public void setUp() {
-        driver = new ChromeDriver();
+    @Test
+    public void checkQuestionAnswer() {
         homePage = new HomePage(driver);
         homePage.open(BASE_URL);
         homePage.acceptCookie();
-    }
-
-    @Test
-    public void checkQuestionAnswer() {
         homePage.clickQuestion(questionIndex);
         String actualAnswer = homePage.getAnswerText(questionIndex);
         assertEquals("Ответ не совпадает!", expectedAnswer, actualAnswer);
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
     }
 }

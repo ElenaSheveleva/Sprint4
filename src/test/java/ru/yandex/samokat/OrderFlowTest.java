@@ -1,24 +1,18 @@
 package ru.yandex.samokat;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import ru.yandex.samokat.pages.HomePage;
 import ru.yandex.samokat.pages.OrderPage;
 
 import static org.junit.Assert.assertTrue;
+import static ru.yandex.samokat.TestData.BASE_URL;
 
 @RunWith(Parameterized.class)
-public class OrderFlowTest {
-    private WebDriver driver;
+public class OrderFlowTest extends BaseTest {
     private HomePage homePage;
     private OrderPage orderPage;
-
-    private static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
 
     private final boolean useTopButton;
     private final String name;
@@ -56,17 +50,13 @@ public class OrderFlowTest {
         };
     }
 
-    @Before
-    public void setUp() {
-        driver = new ChromeDriver();
+    @Test
+    public void positiveOrderFlow() {
         homePage = new HomePage(driver);
         orderPage = new OrderPage(driver);
         homePage.open(BASE_URL);
         homePage.acceptCookie();
-    }
 
-    @Test
-    public void positiveOrderFlow() {
         if (useTopButton) {
             homePage.clickOrderButtonTop();
         } else {
@@ -77,11 +67,5 @@ public class OrderFlowTest {
         orderPage.fillSecondForm(date, period, colors, comment);
         assertTrue(orderPage.isOrderSuccess());
     }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
 }
+
